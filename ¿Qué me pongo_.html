@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Qué me pongo?</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf7f5;--card:#fff;--ink:#1f1b24;--mut:#8a8392;--line:#eee8ea;--acc:#ff5c8a;--grad:linear-gradient(135deg,#ff5c8a,#8b5cf6);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16131a;--card:#221e28;--ink:#f4f0f6;--mut:#a39bad;--line:#312c39}}
+:root[data-theme="dark"]{--bg:#16131a;--card:#221e28;--ink:#f4f0f6;--mut:#a39bad;--line:#312c39}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;position:relative}
+main{flex:1;overflow-y:auto;padding:16px 18px 24px}
+h1{font-size:26px;font-weight:800;margin:4px 0 14px;letter-spacing:-.5px}
+h2{font-size:13px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin:20px 0 8px}
+.big{width:100%;border:0;border-radius:18px;padding:16px;font:800 17px inherit;font-family:inherit;color:#fff;background:var(--grad);box-shadow:0 8px 20px rgba(255,92,138,.35);cursor:pointer}
+.ghost{width:100%;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:14px;font:800 15px inherit;font-family:inherit;cursor:pointer;margin-top:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.item{background:var(--card);border-radius:18px;overflow:hidden;border:1px solid var(--line);cursor:pointer}
+.ph{aspect-ratio:1;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:54px}
+.meta{padding:8px 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.2);flex:none;display:inline-block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 14px;font:600 14px inherit;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--grad);color:#fff;border-color:transparent}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);cursor:pointer;position:relative;padding:0}
+.sw.on{outline:3px solid var(--acc);outline-offset:2px}
+.sw.no::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-shadow:0 0 3px #000}
+nav{display:flex;align-items:center;justify-content:space-around;background:var(--card);border-top:1px solid var(--line);padding:8px 6px 10px}
+nav button{background:none;border:0;color:var(--mut);font:600 11px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:64px}
+nav button span{font-size:22px}
+nav button.on{color:var(--acc)}
+.layer{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:5}
+.sheet{background:var(--bg);width:100%;max-height:92%;overflow-y:auto;border-radius:26px 26px 0 0;padding:20px 18px 28px}
+.empty{text-align:center;color:var(--mut);padding:40px 20px;font-size:15px;line-height:1.5}
+.outfit{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.outfit .item{cursor:default}
+.why{background:var(--card);border-radius:16px;padding:14px;margin:14px 0;font-size:14px;line-height:1.5;border:1px solid var(--line)}
+.row{display:flex;gap:10px}.row button{flex:1}
+.act{border:0;border-radius:16px;padding:14px;font:800 15px inherit;font-family:inherit;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line)}
+input[type=text]{width:100%;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:600 15px inherit;font-family:inherit}
+.photo{aspect-ratio:4/3;border:2px dashed var(--line);border-radius:18px;background:var(--card) center/cover;display:flex;align-items:center;justify-content:center;color:var(--mut);font-weight:600;cursor:pointer;text-align:center}
+#toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13px;font-weight:600;z-index:9;display:none}
+</style></head><body><div id="app"></div><div id="toast"></div><input type="file" id="file" accept="image/*" hidden>
+<script>
+const CATS={Camiseta:['top','👕'],Camisa:['top','👔'],Jersey:['top','🧶'],Pantalón:['bottom','👖'],Falda:['bottom','👗'],Shorts:['bottom','🩳'],Vestido:['dress','👗'],Chaqueta:['outer','🧥'],Abrigo:['outer','🧥'],Zapatos:['shoes','👟']};
+const COL={Negro:'#161616',Blanco:'#f7f7f7',Gris:'#9a9a9a',Beige:'#d9c3a0',Marrón:'#7a5230',Azul:'#3b6fd4',Rojo:'#d93030',Rosa:'#ff8fb3',Verde:'#3aa85a',Amarillo:'#f5d33b',Naranja:'#f58a2b',Morado:'#8b5cf6'};
+const NEU=['Negro','Blanco','Gris','Beige','Marrón','Azul'];
+const CLASH=[['Rojo','Rosa'],['Rojo','Naranja'],['Rojo','Verde'],['Naranja','Rosa'],['Morado','Verde'],['Amarillo','Morado'],['Naranja','Morado']];
+const STY={Casual:1,Deportivo:0,Urbano:1,Clásico:2,Elegante:3,Fiesta:4};
+const OCC={'Casual':1,'Instituto/Trabajo':2,'Cita':3,'Salir':3,'Fiesta':4};
+const CLIM={'Frío ❄️':'f','Templado 🌤️':'t','Calor ☀️':'c'};
+let S={items:[],favs:[],profile:{name:'',styles:[],likes:[],dislikes:[]}};
+try{const r=localStorage.getItem('qmp1');if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+let V='closet',F={occ:'',sty:'',clim:'',want:[],avoid:[]},A=null,R=null,seen=new Set(),L='';
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function save(){try{localStorage.setItem('qmp1',JSON.stringify(S));return true}catch(e){toast('Almacenamiento lleno: borra alguna prenda');return false}}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+const tog=(a,v)=>a.includes(v)?a.filter(x=>x!==v):[...a,v];
+const tile=i=>`<div class="ph" style="${i.photo?`background-image:url(${i.photo})`:`background:${COL[i.color]}33`}">${i.photo?'':CATS[i.cat][1]}</div>`;
+const meta=i=>`<div class="meta"><span class="dot" style="background:${COL[i.color]}"></span>${i.cat}${i.style?' · '+i.style:''}</div>`;
+const chips=(arr,sel,act)=>`<div class="chips">${arr.map(x=>`<button class="chip ${(Array.isArray(sel)?sel.includes(x):sel===x)?'on':''}" data-a="${act}" data-v="${x}">${x}</button>`).join('')}</div>`;
+const sws=(sel,act,no)=>`<div class="chips">${Object.keys(COL).map(c=>`<button class="sw ${sel.includes(c)?'on':''} ${no&&sel.includes(c)?'no':''}" title="${c}" style="background:${COL[c]}" data-a="${act}" data-v="${c}"></button>`).join('')}</div>`;
+
+function view(){
+ if(V==='closet')return `<h1>Mi armario 👗</h1><button class="big" data-a="tab" data-v="create">✨ Crear outfit</button>
+ ${S.items.length?`<div class="grid">${S.items.map(i=>`<div class="item" data-a="item" data-v="${i.id}">${tile(i)}${meta(i)}</div>`).join('')}</div>`:`<div class="empty">Tu armario está vacío.<br>Añade al menos una parte de arriba y una de abajo (o un vestido) para crear outfits.</div>`}
+ <button class="ghost" data-a="add">＋ Añadir prenda</button>`;
+ if(V==='create')return `<h1>Crear outfit</h1><button class="big" data-a="surprise">🎲 Sorpréndeme</button>
+ <h2>Ocasión</h2>${chips(Object.keys(OCC),F.occ,'occ')}<h2>Estilo</h2>${chips(Object.keys(STY),F.sty,'sty')}
+ <h2>Clima</h2>${chips(Object.keys(CLIM),F.clim,'clim')}<h2>Quiero estos colores</h2>${sws(F.want,'want')}
+ <h2>No quiero estos colores</h2>${sws(F.avoid,'avoid',1)}<div style="height:18px"></div><button class="big" data-a="gen">Generar outfit</button>`;
+ if(V==='favs')return `<h1>Favoritos ❤️</h1>${S.favs.length?S.favs.map(f=>{const its=f.ids.map(id=>S.items.find(i=>i.id===id)).filter(Boolean);return `<div class="why"><div class="outfit">${its.map(i=>`<div class="item">${tile(i)}${meta(i)}</div>`).join('')}</div><p>${esc(f.why)}</p><button class="ghost" data-a="unfav" data-v="${f.id}">Quitar de favoritos</button></div>`}).join(''):`<div class="empty">Aún no tienes favoritos.<br>Guarda con ❤️ los outfits que te gusten.</div>`}`;
+ const p=S.profile;return `<h1>Mi perfil</h1><h2>Nombre</h2><input type="text" id="pname" value="${esc(p.name)}" placeholder="Tu nombre">
+ <h2>Mis estilos</h2>${chips(Object.keys(STY),p.styles,'pstyle')}<h2>Colores favoritos</h2>${sws(p.likes,'plike')}<h2>Colores que evito</h2>${sws(p.dislikes,'pdis',1)}
+ <p style="color:var(--mut);font-size:13px;margin-top:20px">Tus preferencias se tienen en cuenta en cada outfit.</p><button class="ghost" data-a="reset">Borrar todos mis datos</button>`;
+}
+function layer(){
+ if(L==='add')return `<div class="layer"><div class="sheet"><h1>Nueva prenda</h1><div class="photo" data-a="pick" style="${A.photo?`background-image:url(${A.photo})`:''}">${A.photo?'':'📷 Toca para hacer o elegir foto'}</div>
+ <h2>Categoría</h2>${chips(Object.keys(CATS),A.cat,'acat')}<h2>Color</h2><div class="chips">${Object.keys(COL).map(c=>`<button class="sw ${A.color===c?'on':''}" style="background:${COL[c]}" title="${c}" data-a="acol" data-v="${c}"></button>`).join('')}</div>
+ <h2>Estilo (opcional)</h2>${chips(Object.keys(STY),A.style,'asty')}<div style="height:18px"></div><button class="big" data-a="saveitem">Guardar prenda</button><button class="ghost" data-a="close">Cancelar</button></div></div>`;
+ if(L==='item'){const i=A;return `<div class="layer"><div class="sheet"><div class="item" style="cursor:default">${tile(i)}${meta(i)}</div><button class="ghost" data-a="del" data-v="${i.id}">🗑️ Eliminar prenda</button><button class="ghost" data-a="close">Cerrar</button></div></div>`}
+ if(L==='res'){const its=R.ids.map(id=>S.items.find(i=>i.id===id));const fv=S.favs.some(f=>f.key===R.key);return `<div class="layer"><div class="sheet"><h1>Tu outfit ✨</h1><div class="outfit">${its.map(i=>`<div class="item">${tile(i)}${meta(i)}</div>`).join('')}</div><div class="why">💡 ${esc(R.why)}</div>
+ <div class="row"><button class="act" data-a="fav">${fv?'💔 Quitar':'❤️ Guardar'}</button><button class="act" data-a="again">🔄 Otro</button><button class="act" data-a="close">❌ Descartar</button></div></div></div>`}
+ return '';
+}
+function render(){const sc=$('main')?.scrollTop||0;
+ $('#app').innerHTML=`<main>${view()}</main><nav>${[['closet','👗','Armario'],['create','✨','Crear'],['favs','❤️','Favoritos'],['profile','🙂','Perfil']].map(t=>`<button class="${V===t[0]?'on':''}" data-a="tab" data-v="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('')}</nav>${layer()}`;
+ $('main').scrollTop=sc}
+
+/* ---- Generador de outfits (reglas, sin IA) ---- */
+function generate(f,surprise){
+ const P=S.profile,slot=s=>S.items.filter(i=>CATS[i.cat][0]===s);
+ const dislikes=[...f.avoid,...P.dislikes],likes=[...f.want,...P.likes];
+ let pool=S.items.filter(i=>!dislikes.includes(i.color));
+ const ok=s=>pool.filter(i=>CATS[i.cat][0]===s);
+ const hasDress=ok('dress').length>0,hasTB=ok('top').length&&ok('bottom').length;
+ if(!hasDress&&!hasTB){ if(S.items.some(i=>dislikes.includes(i.color))&&(slot('dress').length||slot('top').length&&slot('bottom').length)){pool=S.items}else return null }
+ const rnd=a=>a[Math.floor(Math.random()*a.length)],g=s=>pool.filter(i=>CATS[i.cat][0]===s);
+ const target=f.occ?OCC[f.occ]:null,clim=f.clim?CLIM[f.clim]:null,wantSty=f.sty;
+ const cands=new Map();
+ for(let n=0;n<120;n++){
+  let parts=[];
+  if(g('dress').length&&(!(g('top').length&&g('bottom').length)||Math.random()<.35))parts=[rnd(g('dress'))];
+  else if(g('top').length&&g('bottom').length)parts=[rnd(g('top')),rnd(g('bottom'))];else continue;
+  if(g('shoes').length)parts.push(rnd(g('shoes')));
+  if(g('outer').length&&clim!=='c'&&(clim==='f'||Math.random()<.4))parts.push(rnd(g('outer')));
+  const key=parts.map(p=>p.id).sort().join('-');cands.set(key,parts)}
+ let best=[];
+ cands.forEach((parts,key)=>{
+  if(seen.has(key))return;let s=Math.random()*1.5;
+  parts.forEach(i=>{
+   if(i.style){if(wantSty)s+=i.style===wantSty?2.5:-1;if(target!==null)s-=Math.abs(STY[i.style]-target);if(P.styles.includes(i.style))s+=.7}
+   if(likes.includes(i.color))s+=2;if(dislikes.includes(i.color))s-=10;
+   if(clim==='c'&&['Shorts','Falda','Vestido','Camiseta'].includes(i.cat))s+=1;
+   if(clim==='c'&&['Jersey','Abrigo'].includes(i.cat))s-=4;
+   if(clim==='f'&&['Shorts'].includes(i.cat))s-=3;
+   if(clim==='f'&&['Jersey','Abrigo','Chaqueta'].includes(i.cat))s+=1.5});
+  const cs=[...new Set(parts.map(p=>p.color))],nn=cs.filter(c=>!NEU.includes(c));
+  s+=nn.length<=1?2:nn.length===2?.3:-3;
+  CLASH.forEach(([a,b])=>{if(cs.includes(a)&&cs.includes(b))s-=3});
+  best.push({parts,key,s})});
+ if(!best.length){seen.clear();return null}
+ best.sort((a,b)=>b.s-a.s);const pick=rnd(best.slice(0,3)),parts=pick.parts;
+ return{ids:parts.map(p=>p.id),key:pick.key,why:explain(parts,f,clim,likes)}}
+function explain(parts,f,clim,likes){
+ const cs=[...new Set(parts.map(p=>p.color))],nn=cs.filter(c=>!NEU.includes(c)),o=[];
+ if(!nn.length)o.push(`Todo en tonos neutros (${cs.join(', ').toLowerCase()}): una base elegante que nunca falla.`);
+ else if(nn.length===1)o.push(`${nn[0]} es el color protagonista y el resto de prendas lo acompañan sin competir.`);
+ else o.push(`Juega con ${nn.join(' y ').toLowerCase()} y se equilibra con el resto de prendas.`);
+ const st=parts.map(p=>p.style).filter(Boolean);if(st.length)o.push(`El estilo ${[...new Set(st)].join('/').toLowerCase()} le da coherencia al conjunto.`);
+ if(clim==='c')o.push('Ligero y fresco para el calor.');if(clim==='f')o.push(parts.some(p=>CATS[p.cat][0]==='outer')?'Con capa de abrigo para el frío.':'Cubre bien para el frío.');
+ if(f.occ)o.push(`Pensado para ${f.occ.toLowerCase()}.`);
+ const l=cs.find(c=>likes.includes(c));if(l)o.push(`Incluye tu color ${l.toLowerCase()}.`);return o.join(' ')}
+function run(f,sur){if(!S.items.length)return toast('Primero añade prendas a tu armario');
+ const r=generate(f,sur);if(!r){return toast('Necesitas arriba + abajo (o vestido), o ya no hay más combinaciones')}
+ R=r;seen.add(r.key);L='res';render()}
+
+/* ---- Acciones ---- */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,v=t.dataset.v;
+ const P=S.profile;
+ switch(a){
+ case 'tab':V=v;L='';break;
+ case 'add':A={photo:'',cat:'Camiseta',color:'Negro',style:''};L='add';break;
+ case 'pick':$('#file').click();return;
+ case 'acat':A.cat=v;break;case 'acol':A.color=v;break;case 'asty':A.style=A.style===v?'':v;break;
+ case 'saveitem':S.items.push({id:'i'+Date.now(),...A});if(!save()){S.items.pop();return}L='';toast('Prenda añadida ✓');break;
+ case 'item':A=S.items.find(i=>i.id===v);L='item';break;
+ case 'del':S.items=S.items.filter(i=>i.id!==v);S.favs=S.favs.filter(f=>!f.ids.includes(v));save();L='';break;
+ case 'close':L='';break;
+ case 'occ':F.occ=F.occ===v?'':v;break;case 'sty':F.sty=F.sty===v?'':v;break;case 'clim':F.clim=F.clim===v?'':v;break;
+ case 'want':F.want=tog(F.want,v);F.avoid=F.avoid.filter(c=>c!==v);break;
+ case 'avoid':F.avoid=tog(F.avoid,v);F.want=F.want.filter(c=>c!==v);break;
+ case 'gen':seen.clear();return run(F,false);
+ case 'surprise':seen.clear();return run({occ:'',sty:'',clim:'',want:[],avoid:[]},true);
+ case 'again':return run(R.f||F,false);
+ case 'fav':{const i=S.favs.findIndex(f=>f.key===R.key);if(i>=0)S.favs.splice(i,1);else{S.favs.push({id:'f'+Date.now(),key:R.key,ids:R.ids,why:R.why});toast('Guardado en favoritos ❤️')}save();break}
+ case 'unfav':S.favs=S.favs.filter(f=>f.id!==v);save();break;
+ case 'pstyle':P.styles=tog(P.styles,v);save();break;
+ case 'plike':P.likes=tog(P.likes,v);P.dislikes=P.dislikes.filter(c=>c!==v);save();break;
+ case 'pdis':P.dislikes=tog(P.dislikes,v);P.likes=P.likes.filter(c=>c!==v);save();break;
+ case 'reset':if(confirm('¿Borrar armario, favoritos y perfil?')){S={items:[],favs:[],profile:{name:'',styles:[],likes:[],dislikes:[]}};save();toast('Datos borrados')}break}
+ render()});
+document.addEventListener('input',e=>{if(e.target.id==='pname'){S.profile.name=e.target.value;save()}});
+$('#file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{const im=new Image();im.onload=()=>{const m=420,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);A.photo=c.toDataURL('image/jpeg',.7);render()};im.src=r.result};r.readAsDataURL(f);e.target.value=''});
+render();
+</script></body></html>
